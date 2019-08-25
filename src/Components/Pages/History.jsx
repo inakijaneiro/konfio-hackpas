@@ -1,7 +1,7 @@
 import React from 'react';
-import Menu from '../Molecules/Menu';
 import Row from '../Atoms/Row';
 import PageTtile from '../Atoms/PageTitle';
+import axios from 'axios'
 
 const Clientes = [
     {
@@ -37,11 +37,24 @@ const keys = Object.keys(Clientes[0]);
 
 class History extends React.Component {
 
+    componentDidMount() {
+        const { id } = this.props.match.params;
+        axios.get(`http://localhost:3001/${id}/salud`)
+            .then(response => {  
+                console.log(response);
+                              
+                // this.setState({
+                //     ventas: Math.round(response.data.income),
+                //     gastos: Math.round(response.data.outcome),
+                //     maxin: Math.round(response.data.maxIncome),
+                //     maxout: Math.round(response.data.maxOutcome)
+                // })
+            });
+    }
 
     render() {
         return (
             <>
-                <Menu />
                 <div className="p-0-5">
                     <PageTtile text="Tu historial" />
                     <div className="overflow-x-auto card card-shadow mb-1 bg-white sm-up:table">

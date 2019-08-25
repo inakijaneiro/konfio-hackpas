@@ -5,7 +5,6 @@ import SideNote from '../Atoms/SideNote';
 import CardNumber from '../Atoms/CardNumber';
 import Row from '../Atoms/Row';
 import axios from 'axios';
-import Menu from '../Molecules/Menu';
 
 
 const Clientes = [
@@ -47,17 +46,21 @@ class Home extends React.Component {
         super(props);
         this.state = {
             ventas: [],
-            gastos: []
+            gastos: [],
+            maxin: [],
+            maxout: []
         }
     }
 
     componentDidMount() {
-        const { id } = this.props.match.params;        
+        const { id } = this.props.match.params;
         axios.get(`http://localhost:3001/${id}/salud`)
-            .then(response => {
+            .then(response => {                
                 this.setState({
                     ventas: Math.round(response.data.income),
-                    gastos: Math.round(response.data.outcome)
+                    gastos: Math.round(response.data.outcome),
+                    maxin: Math.round(response.data.maxIncome),
+                    maxout: Math.round(response.data.maxOutcome)
                 })
             });
     }
@@ -72,7 +75,7 @@ class Home extends React.Component {
                         <CardNumber amount={this.state.ventas - this.state.gastos} text={`Ganancias`} bg={`green`} color={`black`} classes={`w-full sm-up:w-1/2`} hover={`green-dark`} />
                         <CardNumber amount={this.state.ventas} text={`Ventas`} bg={`purple-light`} color={`white`} classes={`w-full sm-up:w-1/2`} hover={`purple`} />
                         <CardNumber amount={this.state.gastos} text={`Compras`} bg={`purple-light`} color={`white`} classes={`w-full sm-up:w-1/2`} hover={`purple`} />
-                        <CardNumber amount={123123123} text={`Gasto Mayor`} bg={`red-light`} color={`white`} classes={`w-full sm-up:w-1/2`} hover={`red`} />
+                        <CardNumber amount={this.state.maxout} text={`Gasto Mayor`} bg={`red-light`} color={`white`} classes={`w-full sm-up:w-1/2`} hover={`red`} />
                     </div>
                     <Subtitle text={`Tus mejores clientes`} color={`black`} />
                     <div className="overflow-x-auto card card-shadow mb-1 bg-white sm-up:table">

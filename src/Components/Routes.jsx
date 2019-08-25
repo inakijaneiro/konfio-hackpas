@@ -11,7 +11,7 @@ const Routes = ({match}) => (
         <Switch>
             <Route path="/" exact component={Home} />
             <Route path="/:id/salud/" exact component={Health} />
-            <Route path="/historial" exact component={History} />
+            <Route path="/:id/historial" exact component={History} />
             {/* <Route path="/cursos/:id" component={Course} /> */}
             {/* <Route path="/cursos" component={Courses} />
             <Route path="/formulario" component={() => <Form name="Página de contacto" />} />
