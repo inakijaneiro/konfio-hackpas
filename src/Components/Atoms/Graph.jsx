@@ -4,7 +4,7 @@ import {XYPlot, VerticalGridLines, HorizontalGridLines, XAxis, YAxis, LineMarkSe
 // npm install react-vis
 
 const Graph = ({data1, data2, data3, color1, color2, color3}) => (
-    <XYPlot height={400} width= {400} xType="ordinal">
+    <XYPlot height={300} width= {270} xType="ordinal" margin-left='2rem'>
           <VerticalGridLines />
           <HorizontalGridLines />
           <XAxis />
