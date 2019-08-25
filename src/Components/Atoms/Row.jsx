@@ -3,13 +3,15 @@ import Cell from './Cell';
 
 const Row = ({ cells }) => {
 
-    let values = Object.values(cells);   
+    let values = Object.values(cells);
+
     return (
         <tr className="table-row overflow-scroll border-b-2">
             {
                 values.map((element, index) => (
-                <Cell key={index} text={element}/>
-            ))}
+                    <Cell key={index} text={element} />
+                ))
+            }
         </tr>
     )
 

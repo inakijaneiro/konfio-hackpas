@@ -1,11 +1,32 @@
 import React from 'react';
-import {numberWithCommas} from '../vendors';
+import { numberWithCommas } from '../vendors';
 
-const CardNumber = ({ amount, text, bg, color, classes }) => (
-    <div className={`${classes} card card-shadow text-center bg-${bg} text-${color} mb-1`}>
-        <p className="h4 mb-1">{`$${numberWithCommas(amount)}`}</p>
-        <p className="">{text}</p>
-    </div>
+class CardNumber extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            flip: false
+        };
+        this.flipCard = this.flipCard.bind(this);
+    }
 
-)
+    flipCard() {
+        this.setState(prevState => (
+            { flip: !prevState.flip }
+        ));
+        console.log(this.state.flip);
+
+    }
+
+    render() {
+        return (
+            <div className={`h4 ${this.props.classes} card card-shadow hover:bg-${this.props.hover} text-center bg-${this.props.bg} text-${this.props.color} mb-1`} onClick={this.flipCard}>
+                <p className={`mb-1`}>{`$${numberWithCommas(this.props.amount).toString()}`}</p>
+                <p className="">{this.props.text}</p>
+                <p>{this.state.flip.toString()}</p>
+            </div>
+        );
+    }
+}
+
 export default CardNumber;
