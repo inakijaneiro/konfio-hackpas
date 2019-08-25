@@ -5,7 +5,9 @@ module.exports = async function convertCSVtoJSON(csvFilePath) {
     csvFilePath = `api/data/${csvFilePath}`;
     
     // Async / await usage
-    return await csv().fromFile(csvFilePath);
+    return await csv({
+        checkType:true
+    }).fromFile(csvFilePath);
 }
 
 
