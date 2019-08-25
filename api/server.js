@@ -15,11 +15,17 @@ let convertCSVtoJSON = require('./src/CSVToJSON/index');
 
 let csvFiles = ["Person1.csv", "Person2.csv", "Person3.csv"];
 
+// app.get('/', function (req, res) {
+//     res.send("Welcome!")
+// })
+
 app.get('/', function (req, res) {
-    let myPerson = new Company({name: "Inaki"});
-    myPerson.save((err, person) => {
-        if (err) return console.error(err);
-    console.log(person);
+    Company.find().distinct("rfc", function(err, companies){
+        if(err){
+          console.log(err);
+        } else{
+            res.send(companies)
+        }
     })
 });
 
