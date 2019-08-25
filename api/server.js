@@ -42,7 +42,7 @@ app.get("/:rfc/salud/", function (req, res){
         income: 0,
         outcome: 0,
     }
-
+    
     Company.aggregate([{
         $match : { $and : [ {rfc: rfcFromParam}, {receptorrfc: rfcFromParam }] },
     },
@@ -55,8 +55,8 @@ app.get("/:rfc/salud/", function (req, res){
         }
     }], (err, doc) =>{
         if (err) {
-        res.status(400);
-        res.send('None shall pass');
+            res.status(400);
+            res.send('None shall pass');
         } else {
             data.income = doc[0].total;
             Company.aggregate([{
@@ -74,6 +74,7 @@ app.get("/:rfc/salud/", function (req, res){
                 res.status(400);
                 res.send('None shall pass');
                 } else {
+                    
                     data.outcome = doc[0].total;
                     res.send(data);
                 }
