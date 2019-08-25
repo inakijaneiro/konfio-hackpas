@@ -7,8 +7,8 @@ let CompanySchema = new mongoose.Schema({
     ccyfx: Number,
     paymentmethod: Number,
     paymenttype: String,
-    subtotal: String,
-    total: String,
+    subtotal: Number,
+    total: Number,
     placegenerated: Number,
     date: Date,
     receptorrfc: String,
@@ -18,7 +18,7 @@ let CompanySchema = new mongoose.Schema({
     status: String,
     productid: Number,
     quantity: Number,
-    cost: String
+    cost: Number
   });
 
 let Company = mongoose.model("Company", CompanySchema);
