@@ -4,8 +4,6 @@ import Cell from './Cell';
 const Row = ({ cells }) => {
 
     let values = Object.values(cells);   
-    // let att = cells.getAttribute('type'); 
-
     return (
         <tr className="table-row overflow-scroll border-b-2">
             {
