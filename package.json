@@ -4,10 +4,12 @@
   "private": true,
   "dependencies": {
     "concurrently": "^4.1.2",
+    "cors": "^2.8.5",
     "cross-env": "^5.2.0",
     "csvtojson": "^2.0.10",
     "express": "^4.17.1",
     "mongoose": "^5.6.10",
+    "mongoose-currency": "^0.2.0",
     "nodemon": "^1.19.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
