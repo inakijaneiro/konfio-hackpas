@@ -1,13 +1,13 @@
 import React from 'react';
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Health from './Pages/Health';
 import History from './Pages/History';
 import Home from './Pages/Home';
 import Menu from './Molecules/Menu';
 
-const Routes = ({match}) => (
+const Routes = ({ match }) => (
     <Router>
-        <Menu/>
+        <Menu />
         <Switch>
             <Route path="/" exact component={Home} />
             <Route path="/:id/salud/" exact component={Health} />
