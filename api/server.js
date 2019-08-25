@@ -2,6 +2,7 @@ let express = require('express');
 let app = express();
 var mongoose = require('mongoose');
 const credentials = require("../private/mongoPass");
+let generateFakeData = require("./src/generateFakeData/index")
 
 //Models
 
@@ -33,6 +34,8 @@ function loadCSVFiles() {
     csvFiles.forEach(csvFile => {
         convertCSVtoJSON(csvFile).catch(err => {
             console.log(`Could not convert CSV ${csvFile} to JSON`);
+        }).then(JSONFile => {
+            generateFakeData(JSONFile);
         });
     })
 }
