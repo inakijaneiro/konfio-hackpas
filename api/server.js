@@ -42,45 +42,58 @@ app.get("/:rfc/salud/", function (req, res){
         income: 0,
         outcome: 0,
     }
-    
-    Company.aggregate([{
-        $match : { $and : [ {rfc: rfcFromParam}, {receptorrfc: rfcFromParam }] },
-    },
-    {
-        $group : {
-            _id : null,
-            total: {
-                $sum : "$total"
-            }
-        }
-    }], (err, doc) =>{
-        if (err) {
-            res.status(400);
-            res.send('None shall pass');
-        } else {
-            data.income = doc[0].total;
-            Company.aggregate([{
-                $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
-            },
-            {
-                $group : {
-                    _id : null,
-                    total : {
-                        $sum : "$total"
-                    }
+    try  {
+        Company.aggregate([{
+            $match : { $and : [ {rfc: rfcFromParam}, {receptorrfc: rfcFromParam }] },
+        },
+        {
+            $group : {
+                _id : null,
+                total: {
+                    $sum : "$total"
+                },
+                max: {
+                    $max : "$total"
                 }
-            }], (err, doc) =>{
-                if (err) {
+            }
+        }], (err, doc) =>{
+            if (err) {
                 res.status(400);
                 res.send('None shall pass');
-                } else {
-                    
-                    data.outcome = doc[0].total;
-                    res.send(data);
-                }
-            })
-        }
-    })
+            } else {
+                data.income = doc[0].total;
+                console.log(doc[0]);
+                
+                data.maxIncome = doc[0].max;
+                Company.aggregate([{
+                    $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
+                },
+                {
+                    $group : {
+                        _id : null,
+                        total : {
+                            $sum : "$total"
+                        },
+                        max: {
+                            $max : "$total"
+                        }
+                    }
+                }], (err, doc) =>{
+                    if (err) {
+                    res.status(400);
+                    res.send('None shall pass');
+                    } else {
+                        
+                        data.outcome = doc[0].total;
+                        data.maxOutcome = doc[0].max;
+                        res.send(data);
+                    }
+                })
+            }
+        })
+    } catch (e) {
+        res.send("There was an error getting the data")
+    }
 
     
 })
