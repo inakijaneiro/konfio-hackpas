@@ -18,14 +18,14 @@ class History extends React.Component {
     componentDidMount() {
         const { id } = this.props.match.params;
         axios.get(`https://pure-ravine-38602.herokuapp.com/${id}/salud`)
-            .then(response => {                
+            .then(response => {
                 this.setState({
                     top: (response.data.top5[0]),
                     head: (response.data.top5[0][0]),
                 })
             });
         axios.get(`https://pure-ravine-38602.herokuapp.com/${id}/historial`)
-            .then(response => {                
+            .then(response => {
                 this.setState({
                     firstYearIncomes: response.data.firstYearIncomes,
                     firstYearOutcomes: response.data.firstYearOutcomes
@@ -86,52 +86,54 @@ class History extends React.Component {
         let valores1 = data1.map(valores => {
             return {
                 x: valores.x,
-                y: valores.y / 1000000
+                y: valores.y / 1000000000
             }
         })
         let valores2 = data1.map(valores => {
             return {
                 x: valores.x,
-                y: valores.y2 / 1000000
+                y: valores.y2 / 1000000000
             }
         })
         let valores3 = data1.map(valores => {
             return {
                 x: valores.x,
-                y: valores.y3 / 1000000
+                y: valores.y3 / 1000000000
             }
         })
 
 
         return (
             <>
-                <div className="p-0-5">
+                <div className="p-0-5 w-full">
                     <PageTtile text={`Tus mejores ventas`} color={`black`} />
-                    <div className="overflow-x-auto card card-shadow mb-1 bg-white sm-up:table">
-                        <table>
-                            <thead>
-                                <Row cells={Object.keys(this.state.head)} />
-                            </thead>
-                            <tbody>
-                                {
-                                    (this.state.top).map((cliente, index) => (
-                                        <Row key={index} cells={cliente} />
-                                    ))
-                                }
-                            </tbody>
-                        </table>
+                    <div className="md-up:flex justify-center">
+                        <div className="overflow-x-auto card card-shadow mb-1 bg-white sm-up:table mr-1">
+                            <table>
+                                <thead>
+                                    <Row cells={Object.keys(this.state.head)} />
+                                </thead>
+                                <tbody>
+                                    {
+                                        (this.state.top).map((cliente, index) => (
+                                            <Row key={index} cells={cliente} />
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <Graph data1={valores1} data2={valores2} data3={valores3} color1='purple' color2='red' color3='green' />
+                            <div className="bg-blue-lighter " >
+                            <ul className="text-center">
+                                <li className="text-xs text-white inline-flex pr-0-5">{`Purple -> Income`}</li>
+                                <li className="text-xs text-white inline-flex pr-0-5">{`Red -> Outcome `}</li>
+                                <li className="text-xs text-white inline-flex">Green -> Profits </li>
+                            </ul>
+                        </div>
+                        </div>
+                        
                     </div>
-                    <div>
-                        <Graph data1={valores1} data2={valores2} data3={valores3} color1='purple' color2='red' color3='green' />
-                    </div>
-                    <div className="bg-blue-lighter" >
-                        <ul className="text-center">
-                            <li className="text-xs text-white inline-flex pr-0-5">{`Purple -> Income`}</li>
-                            <li className="text-xs text-white inline-flex pr-0-5">{`Red -> Outcome `}</li>
-                            <li className="text-xs text-white inline-flex">Green -> Profits </li>
-                        </ul>
-                    </div>
-
                 </div>
             </>
         )
