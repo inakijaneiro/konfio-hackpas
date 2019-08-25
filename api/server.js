@@ -9,8 +9,8 @@ const credentials = require("../private/mongoPass");
 let Company = require("./models/Company");
 
 
-mongoose.connect(`mongodb://${credentials.dbUserName}:${credentials.dbPassword}@ds019482.mlab.com:19482/hackpas`, {useNewUrlParser: true});
-mongoose.connection.once('open', function() { 
+mongoose.connect(`mongodb://${credentials.dbUserName}:${credentials.dbPassword}@ds019482.mlab.com:19482/hackpas`, { useNewUrlParser: true });
+mongoose.connection.once('open', function () {
     // All OK - fire (emit) a ready event. 
     deleteCompanies();
 });
@@ -21,43 +21,56 @@ let csvFiles = ["Person1.csv", "Person2.csv", "Person3.csv"];
 app.use(cors()); //Allows localhost
 
 app.get('/', function (req, res) {
-    
-    Company.find().distinct("rfc", function(err, companies){
-        if(err){
+
+    Company.find().distinct("rfc", function (err, companies) {
+        if (err) {
             res.status(400);
             res.send('None shall pass');
-        } else{
+        } else {
             res.json(companies);
         }
     })
 });
 
-//TODO: Fix concurrency, it doesnt work when companies havent fully loaded
-app.get("/:rfc/salud/", function (req, res){
-    
+app.get("/:rfc/salud/", function (req, res) {
+
     let data = {
         income: 0,
         outcome: 0,
         maxIncome: 0,
         maxOutcome: 0,
-        firstYearIncomes: [],
-        firstYearOutcomes: []
+        top5: []
     }
-    try  {
-        queryFirstDashboard(data, res, req, queryGraph);
+    try {
+        queryFirstDashboard(data, res, req);
     } catch (e) {
         res.send("There was an error getting the data")
     }
 
-    
+
+})
+
+app.get("/:rfc/historial/", function (req, res) {
+
+    let data = {
+        firstYearIncomes: [],
+        firstYearOutcomes: []
+    }
+    try {
+        queryGraph(data, res, req);
+    } catch (e) {
+        res.send("There was an error getting the data")
+    }
+
+
 })
 
 
-app.on('ready', function() { 
-    app.listen(3001, function(){ 
-        console.log("API Running on port 3001"); 
-    }); 
-}); 
+app.on('ready', function () {
+    app.listen(3001, function () {
+        console.log("API Running on port 3001");
+    });
+});
 
 
 function loadCSVFiles() {
@@ -76,12 +89,12 @@ function deleteCompanies() {
     Company.deleteMany({}, (err, succ) => {
         if (err) return console.log(err);
         console.log("Deleted companies from Database!");
-        loadCSVFiles()  
+        loadCSVFiles();
     })
 }
 function generateCompanies(JSONFile, items, length) {
-    
-    Company.collection.insertMany(JSONFile, (err, succ)  => {
+
+    Company.collection.insertMany(JSONFile, (err, succ) => {
         if (err) {
             return console.log(err);
         }
@@ -93,53 +106,77 @@ function generateCompanies(JSONFile, items, length) {
     });
 }
 
-function queryFirstDashboard(data, res, req, queryGraph) {
+function queryFirstDashboard(data, res, req) {
 
     let rfcFromParam = req.params.rfc;
 
     Company.aggregate([{
-        $match : { $and : [ {rfc: rfcFromParam}, {receptorrfc: rfcFromParam }] },
+        $match: { $and: [{ rfc: rfcFromParam }, { receptorrfc: rfcFromParam }] },
     },
     {
-        $group : {
-            _id : null,
+        $group: {
+            _id: null,
             total: {
-                $sum : "$total"
+                $sum: "$total"
             },
             max: {
-                $max : "$total"
+                $max: "$total"
             }
         }
-    }], (err, doc) =>{
+    }], (err, doc) => {
         if (err) {
             res.status(400);
             res.send('None shall pass');
         } else {
-            data.income = doc[0].total;
-            
-            data.maxIncome = doc[0].max;
+            if (doc[0]) {
+                data.income = doc[0].total;
+
+                data.maxIncome = doc[0].max;
+            }
             Company.aggregate([{
-                $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
+                $match: { $and: [{ rfc: rfcFromParam }, { emisorrfc: rfcFromParam }] },
             },
             {
-                $group : {
-                    _id : null,
-                    total : {
-                        $sum : "$total"
+                $group: {
+                    _id: null,
+                    total: {
+                        $sum: "$total"
                     },
                     max: {
-                        $max : "$total"
+                        $max: "$total"
                     }
                 }
-            }], (err, doc) =>{
+            }], (err, doc) => {
                 if (err) {
-                res.status(400);
-                res.send('None shall pass');
+                    res.status(400);
+                    res.send('None shall pass');
                 } else {
-                    
-                    data.outcome = doc[0].total;
-                    data.maxOutcome = doc[0].max;
-                    queryGraph(data, res, req);
+                    if (doc[0]) {
+                        data.outcome = doc[0].total;
+                        data.maxOutcome = doc[0].max;
+                    }
+                    Company.aggregate([{
+                        $match: { $and: [{ rfc: rfcFromParam }, { emisorrfc: rfcFromParam }] },
+                    },
+                    {
+                        $project:
+                        {
+                            "_id": 0,
+                            "receptorrfc": 1,
+                            total: { $sum: "$total" }
+                        }
+                    },
+                    // Sorting pipeline
+                    { "$sort": { "total": -1 } },
+                    // Optionally limit results
+                    { "$limit": 5 }
+                    ], (err, doc) => {
+                        if (err) return console.log(err);
+                        if (doc[0]) {
+                            data.top5.push(doc)
+                        }
+                        res.json(data);
+                    });
                 }
             })
         }
@@ -150,24 +187,24 @@ function queryGraph(data, res, req) {
 
     let rfcFromParam = req.params.rfc;
     Company.aggregate([{
-        $match : { $and : [ {rfc: rfcFromParam}, {receptorrfc: rfcFromParam }] },
-        },
-        {$project: {"_id":0, "income": "$total","date": 1}}
+        $match: { $and: [{ rfc: rfcFromParam }, { receptorrfc: rfcFromParam }] },
+    },
+    { $project: { "_id": 0, "income": "$total", "date": 1 } }
     ], (err, docs) => {
         if (err) return console.log(err);
         docs.forEach(doc => {
             data.firstYearIncomes.push(doc);
         })
         Company.aggregate([{
-            $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
-            },
-            {$project: {"_id":0, "outcome": "$total","date": 1}}
+            $match: { $and: [{ rfc: rfcFromParam }, { emisorrfc: rfcFromParam }] },
+        },
+        { $project: { "_id": 0, "outcome": "$total", "date": 1 } }
         ], (err, docs) => {
             if (err) return console.log(err);
             docs.forEach(doc => {
                 data.firstYearOutcomes.push(doc);
             })
-            res.send(data);
-        })  
+            res.json(data);
+        })
     })
 }
