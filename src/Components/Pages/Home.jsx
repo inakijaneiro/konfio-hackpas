@@ -11,7 +11,7 @@ class Home extends React.Component {
                 <ul>
                     <li className="anchor"><Link to='/JXA0004269K9'>Usuario 1</Link></li>
                     <li className="anchor"><Link to='/PST1205156S0'>Usuario 2</Link></li>
-                    <li className="anchor"><Link to='/JXA0004269K9'>Usuario 3</Link></li>
+                    <li className="anchor"><Link to='/TAF100112H1A'>Usuario 3</Link></li>
                 </ul>
                 <Route path='/:id/salud' component={Health}/>
             </>
