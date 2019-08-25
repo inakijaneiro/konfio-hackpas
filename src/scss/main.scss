@@ -3,5 +3,10 @@
 
 
 .card.w-full p:first-child {
-    font-size: 2rem;
+    font-size: 1.5rem;
+}
+
+.active {
+    color: #7264c9;
+    font-weight: 600;
 }
