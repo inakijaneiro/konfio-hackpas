@@ -1,5 +1,6 @@
 let express = require('express');
 let app = express();
+let cors = require('cors');
 var mongoose = require('mongoose');
 const credentials = require("../private/mongoPass");
 let generateFakeData = require("./src/generateFakeData/index")
@@ -15,11 +16,9 @@ let convertCSVtoJSON = require('./src/CSVToJSON/index');
 
 let csvFiles = ["Person1.csv", "Person2.csv", "Person3.csv"];
 
-app.get('/', function (req, res) {
-    res.send("Welcome!")
-})
+app.use(cors()); //Allows localhost
 
-app.post('/', function (req, res) {
+app.get('/', function (req, res) {
     Company.find().distinct("rfc", function(err, companies){
         if(err){
           console.log(err);
