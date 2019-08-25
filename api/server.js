@@ -21,6 +21,8 @@ let csvFiles = ["Person1.csv", "Person2.csv", "Person3.csv"];
 app.use(cors()); //Allows localhost
 
 app.get('/', function (req, res) {
+    console.log();
+    
     Company.find().distinct("rfc", function(err, companies){
         if(err){
             res.status(400);
@@ -38,7 +40,7 @@ app.get("/:rfc/salud/", function (req, res){
     
     let data = {
         income: 0,
-        outcome: 0
+        outcome: 0,
     }
 
     Company.aggregate([{
@@ -57,34 +59,34 @@ app.get("/:rfc/salud/", function (req, res){
         res.send('None shall pass');
         } else {
             data.income = doc[0].total;
+            Company.aggregate([{
+                $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
+            },
+            {
+                $group : {
+                    _id : null,
+                    total : {
+                        $sum : "$total"
+                    }
+                }
+            }], (err, doc) =>{
+                if (err) {
+                res.status(400);
+                res.send('None shall pass');
+                } else {
+                    data.outcome = doc[0].total;
+                    res.send(data);
+                }
+            })
         }
-    }).then(Company.aggregate([{
-        $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
-    },
-    {
-        $group : {
-            _id : null,
-            total : {
-                $sum : "$total"
-            }
-        }
-    }], (err, doc) =>{
-        if (err) {
-        res.status(400);
-        res.send('None shall pass');
-        } else {
-            data.outcome = doc[0].total;
-        }
-    })).then( _ => {
-        res.send(data);
     })
-    
 
+    
 })
 
 
 app.on('ready', function() { 
-    app.listen(3000, function(){ 
+    app.listen(3001, function(){ 
         console.log("API Running on port 3001"); 
     }); 
 }); 
