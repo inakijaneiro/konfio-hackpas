@@ -21,7 +21,6 @@ let csvFiles = ["Person1.csv", "Person2.csv", "Person3.csv"];
 app.use(cors()); //Allows localhost
 
 app.get('/', function (req, res) {
-    console.log();
     
     Company.find().distinct("rfc", function(err, companies){
         if(err){
@@ -35,51 +34,20 @@ app.get('/', function (req, res) {
 
 //TODO: Fix concurrency, it doesnt work when companies havent fully loaded
 app.get("/:rfc/salud/", function (req, res){
-    let rfcFromParam = req.params.rfc;
-    console.log(rfcFromParam);
     
     let data = {
         income: 0,
         outcome: 0,
+        maxIncome: 0,
+        maxOutcome: 0,
+        firstYearIncomes: [],
+        firstYearOutcomes: []
     }
-
-    Company.aggregate([{
-        $match : { $and : [ {rfc: rfcFromParam}, {receptorrfc: rfcFromParam }] },
-    },
-    {
-        $group : {
-            _id : null,
-            total: {
-                $sum : "$total"
-            }
-        }
-    }], (err, doc) =>{
-        if (err) {
-        res.status(400);
-        res.send('None shall pass');
-        } else {
-            data.income = doc[0].total;
-            Company.aggregate([{
-                $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
-            },
-            {
-                $group : {
-                    _id : null,
-                    total : {
-                        $sum : "$total"
-                    }
-                }
-            }], (err, doc) =>{
-                if (err) {
-                res.status(400);
-                res.send('None shall pass');
-                } else {
-                    data.outcome = doc[0].total;
-                    res.send(data);
-                }
-            })
-        }
-    })
+    try  {
+        queryFirstDashboard(data, res, req, queryGraph);
+    } catch (e) {
+        res.send("There was an error getting the data")
+    }
 
     
 })
@@ -123,4 +91,83 @@ function generateCompanies(JSONFile, items, length) {
             app.emit('ready');
         }
     });
+}
+
+function queryFirstDashboard(data, res, req, queryGraph) {
+
+    let rfcFromParam = req.params.rfc;
+
+    Company.aggregate([{
+        $match : { $and : [ {rfc: rfcFromParam}, {receptorrfc: rfcFromParam }] },
+    },
+    {
+        $group : {
+            _id : null,
+            total: {
+                $sum : "$total"
+            },
+            max: {
+                $max : "$total"
+            }
+        }
+    }], (err, doc) =>{
+        if (err) {
+            res.status(400);
+            res.send('None shall pass');
+        } else {
+            data.income = doc[0].total;
+            
+            data.maxIncome = doc[0].max;
+            Company.aggregate([{
+                $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
+            },
+            {
+                $group : {
+                    _id : null,
+                    total : {
+                        $sum : "$total"
+                    },
+                    max: {
+                        $max : "$total"
+                    }
+                }
+            }], (err, doc) =>{
+                if (err) {
+                res.status(400);
+                res.send('None shall pass');
+                } else {
+                    
+                    data.outcome = doc[0].total;
+                    data.maxOutcome = doc[0].max;
+                    queryGraph(data, res, req);
+                }
+            })
+        }
+    })
+}
+
+function queryGraph(data, res, req) {
+
+    let rfcFromParam = req.params.rfc;
+    Company.aggregate([{
+        $match : { $and : [ {rfc: rfcFromParam}, {receptorrfc: rfcFromParam }] },
+        },
+        {$project: {"_id":0, "income": "$total","date": 1}}
+    ], (err, docs) => {
+        if (err) return console.log(err);
+        docs.forEach(doc => {
+            data.firstYearIncomes.push(doc);
+        })
+        Company.aggregate([{
+            $match : { $and : [ {rfc: rfcFromParam}, {emisorrfc: rfcFromParam }] },
+            },
+            {$project: {"_id":0, "outcome": "$total","date": 1}}
+        ], (err, docs) => {
+            if (err) return console.log(err);
+            docs.forEach(doc => {
+                data.firstYearOutcomes.push(doc);
+            })
+            res.send(data);
+        })  
+    })
 }
